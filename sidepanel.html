@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyricTab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0c0c0d;
+      --surface:  #141416;
+      --surface2: #1c1c1f;
+      --surface3: #222226;
+      --border:   #2c2c32;
+      --accent:   #e8c97e;
+      --accent2:  #c97e8e;
+      --viet:     #ff6b4a;
+      --viet-dim: rgba(255, 107, 74, 0.15);
+      --green:    #7ec9a0;
+      --text:     #f0ede8;
+      --muted:    #6a6875;
+      --muted2:   #9a97a5;
+      --radius:   10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; overflow: hidden; }
+
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Header ── */
+    .header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 19px;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+    .logo em { color: var(--accent2); font-style: italic; }
+
+    .header-right { display: flex; align-items: center; gap: 6px; }
+
+    /* Language toggle */
+    .lang-toggle {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      padding: 5px 9px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .lang-btn.active {
+      background: var(--surface3);
+      color: var(--text);
+    }
+    .lang-btn.active.viet { color: var(--viet); }
+    .lang-btn.active.intl { color: var(--accent); }
+
+    .btn-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted2);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      font-size: 14px;
+    }
+    .btn-icon:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── Detect bar ── */
+    .detect-bar {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: none;
+    }
+    .detect-bar.visible { display: block; }
+    .detect-bar.viet-mode { border-left: 3px solid var(--viet); }
+
+    .detect-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 4px; }
+    .detect-song { font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .detect-artist { font-size: 11px; color: var(--accent); margin-top: 2px; }
+    .detect-artist.viet { color: var(--viet); }
+
+    /* ── Search row ── */
+    .search-row {
+      flex-shrink: 0;
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .input-wrap { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+
+    .field { position: relative; }
+    .field-label {
+      position: absolute;
+      left: 9px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      pointer-events: none;
+    }
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 8px 9px 8px 52px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); background: var(--surface3); }
+    .field input.viet:focus { border-color: var(--viet); }
+    .field input::placeholder { color: var(--muted); }
+
+    .btn-search {
+      align-self: stretch;
+      background: var(--accent);
+      color: #0c0c0d;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 0 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.02em;
+      line-height: 1.5;
+      text-align: center;
+    }
+    .btn-search:hover { opacity: 0.88; }
+    .btn-search:active { transform: scale(0.97); }
+    .btn-search.viet { background: var(--viet); }
+
+    /* ── Source badge ── */
+    .source-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .source-badge.visible { display: flex; }
+    .source-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .source-dot.fallback { background: var(--accent2); }
+    .source-name { color: var(--muted2); }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .content::-webkit-scrollbar { width: 4px; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── State: idle ── */
+    .state-idle {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      text-align: center;
+      min-height: 280px;
+    }
+    .state-idle.visible { display: flex; }
+    .idle-icon { font-size: 36px; margin-bottom: 14px; opacity: 0.6; }
+    .idle-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); margin-bottom: 8px; }
+    .idle-sub { font-size: 11px; color: var(--muted); line-height: 1.7; max-width: 220px; }
+
+    /* ── State: loading ── */
+    .state-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      min-height: 280px;
+    }
+    .state-loading.visible { display: flex; }
+    .vinyl {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: conic-gradient(var(--border) 0deg, var(--surface3) 60deg, var(--border) 120deg, var(--surface3) 180deg, var(--border) 240deg, var(--surface3) 300deg, var(--border) 360deg);
+      animation: spin 1.4s linear infinite;
+      position: relative;
+      margin-bottom: 18px;
+    }
+    .vinyl::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+    }
+    .vinyl.viet::after { background: var(--viet); }
+    .vinyl.intl::after { background: var(--accent); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+    .loading-source { font-size: 12px; color: var(--muted2); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ── State: error ── */
+    .state-error { display: none; padding: 16px; }
+    .state-error.visible { display: block; }
+    .error-card {
+      background: rgba(201, 126, 142, 0.08);
+      border: 1px solid rgba(201, 126, 142, 0.25);
+      border-radius: var(--radius);
+      padding: 14px 15px;
+    }
+    .error-title { font-size: 10px; color: var(--accent2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+    .error-msg { font-size: 12px; color: var(--muted2); line-height: 1.6; }
+    .error-hint { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+    /* ── State: lyrics ── */
+    .state-lyrics { display: none; }
+    .state-lyrics.visible { display: block; }
+
+    .lyrics-hero {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--surface2) 0%, transparent 100%);
+    }
+    .lyrics-hero.viet { border-left: 3px solid var(--viet); }
+
+    .waveform {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 20px;
+      margin-bottom: 8px;
+    }
+    .waveform-bar {
+      width: 3px;
+      border-radius: 2px;
+      opacity: 0.6;
+      animation: wave 1.2s ease-in-out infinite;
+    }
+    .waveform-bar.intl { background: var(--accent); }
+    .waveform-bar.viet { background: var(--viet); }
+    .waveform-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
+    .waveform-bar:nth-child(2) { height: 70%; animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { height: 100%; animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { height: 60%; animation-delay: 0.3s; }
+    .waveform-bar:nth-child(5) { height: 85%; animation-delay: 0.15s; }
+    .waveform-bar:nth-child(6) { height: 45%; animation-delay: 0.05s; }
+    @keyframes wave { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+    .lyrics-hero-artist { font-family: 'DM Serif Display', serif; font-size: 20px; line-height: 1.2; margin-bottom: 3px; }
+    .lyrics-hero-artist.intl { color: var(--accent); }
+    .lyrics-hero-artist.viet { color: var(--viet); }
+    .lyrics-hero-song { font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--muted2); font-style: italic; }
+
+    .lyrics-body { padding: 16px 16px 32px; }
+    .lyrics-text { white-space: pre-wrap; font-size: 13px; line-height: 2; color: var(--text); opacity: 0.9; }
+
+    /* ── Footer ── */
+    .footer {
+      flex-shrink: 0;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .footer.visible { display: flex; }
+    .footer-link { font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .footer-link:hover { color: var(--accent); }
+    .footer-spacer { flex: 1; }
+    .footer-copy { font-size: 10px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Lyric<em>Tab</em></div>
+    <div class="header-right">
+      <!-- Language toggle -->
+      <div class="lang-toggle">
+        <button class="lang-btn intl active" id="btnIntl">🌐 EN</button>
+        <button class="lang-btn viet" id="btnViet">🇻🇳 VN</button>
+      </div>
+      <div class="btn-icon" id="refreshBtn" title="Re-detect from YouTube">↺</div>
+    </div>
+  </div>
+
+  <!-- Detected song -->
+  <div class="detect-bar" id="detectBar">
+    <div class="detect-label">Now playing</div>
+    <div class="detect-song" id="detectSong">—</div>
+    <div class="detect-artist" id="detectArtist"></div>
+  </div>
+
+  <!-- Search inputs -->
+  <div class="search-row">
+    <div class="input-wrap">
+      <div class="field">
+        <span class="field-label">Artist</span>
+        <input type="text" id="inputArtist" placeholder="e.g. Sơn Tùng M-TP" />
+      </div>
+      <div class="field">
+        <span class="field-label">Song</span>
+        <input type="text" id="inputTitle" placeholder="e.g. Muộn Rồi Mà Sao Còn" />
+      </div>
+    </div>
+    <button class="btn-search" id="searchBtn">Find<br>Lyrics</button>
+  </div>
+
+  <!-- Source indicator -->
+  <div class="source-badge" id="sourceBadge">
+    <div class="source-dot" id="sourceDot"></div>
+    <span>Source: </span><span class="source-name" id="sourceName">—</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <div class="state-idle" id="stateIdle">
+      <div class="idle-icon">🎵</div>
+      <div class="idle-title">Ready to find lyrics</div>
+      <div class="idle-sub">Open a YouTube video — the song will be detected automatically. Or search manually above.<br><br>Toggle 🇻🇳 VN for Vietnamese song priority.</div>
+    </div>
+
+    <div class="state-loading" id="stateLoading">
+      <div class="vinyl intl" id="vinylSpinner"></div>
+      <div class="loading-label">Searching</div>
+      <div class="loading-source" id="loadingSource">lrclib.net…</div>
+    </div>
+
+    <div class="state-error" id="stateError">
+      <div class="error-card">
+        <div class="error-title">Lyrics not found</div>
+        <div class="error-msg" id="errorMsg">—</div>
+        <div class="error-hint">Try editing the artist / song name above, or switch the 🌐/🇻🇳 toggle.</div>
+      </div>
+    </div>
+
+    <div class="state-lyrics" id="stateLyrics">
+      <div class="lyrics-hero" id="lyricsHero">
+        <div class="waveform" id="waveform">
+          <div class="waveform-bar intl"></div>
+          <div class="waveform-bar intl"></div>
+          <div class="waveform-bar intl"></div>
+          <div class="waveform-bar intl"></div>
+          <div class="waveform-bar intl"></div>
+          <div class="waveform-bar intl"></div>
+        </div>
+        <div class="lyrics-hero-artist intl" id="lyricsArtist"></div>
+        <div class="lyrics-hero-song" id="lyricsSong"></div>
+      </div>
+      <div class="lyrics-body">
+        <div class="lyrics-text" id="lyricsText"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer" id="footer">
+    <a class="footer-link" id="geniusLink" href="#" target="_blank">Genius ↗</a>
+    <a class="footer-link" id="ytLink" href="#" target="_blank">YouTube ↗</a>
+    <div class="footer-spacer"></div>
+    <div class="footer-copy">LyricTab v3</div>
+  </div>
+
+</div>
+<script src="sidepanel.js"></script>
+</body>
+</html>
