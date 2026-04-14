@@ -1,4 +1,4 @@
-# LyricTab v2 – YouTube Lyrics in Side Panel
+# LyricTab v1 – YouTube Lyrics in Side Panel
 
 Opens a MetaMask-style side panel with lyrics for the YouTube video you're watching.
 
