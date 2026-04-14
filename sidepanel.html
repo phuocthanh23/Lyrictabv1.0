@@ -190,6 +190,7 @@
       background: var(--green);
     }
     .source-dot.fallback { background: var(--accent2); }
+    .source-dot.hac      { background: var(--viet); }
     .source-name { color: var(--muted2); }
 
     /* ── Content ── */
@@ -350,12 +351,12 @@
   <div class="search-row">
     <div class="input-wrap">
       <div class="field">
-        <span class="field-label">Artist</span>
-        <input type="text" id="inputArtist" placeholder="e.g. Sơn Tùng M-TP" />
-      </div>
-      <div class="field">
         <span class="field-label">Song</span>
         <input type="text" id="inputTitle" placeholder="e.g. Muộn Rồi Mà Sao Còn" />
+      </div>
+      <div class="field">
+        <span class="field-label">Artist</span>
+        <input type="text" id="inputArtist" placeholder="e.g. Sơn Tùng M-TP" />
       </div>
     </div>
     <button class="btn-search" id="searchBtn">Find<br>Lyrics</button>
@@ -373,7 +374,12 @@
     <div class="state-idle" id="stateIdle">
       <div class="idle-icon">🎵</div>
       <div class="idle-title">Ready to find lyrics</div>
-      <div class="idle-sub">Open a YouTube video — the song will be detected automatically. Or search manually above.<br><br>Toggle 🇻🇳 VN for Vietnamese song priority.</div>
+      <div class="idle-sub">
+        Open a YouTube video and the song will be detected automatically.<br><br>
+        <strong style="color:var(--muted2)">Same song title, different artist?</strong><br>
+        Many songs share the same name. If the wrong lyrics appear, edit the Artist or Song fields above and press <strong style="color:var(--accent)">Find Lyrics</strong> to search manually — we can't always get it right automatically.<br><br>
+        Toggle <strong>🇻🇳 VN</strong> to prioritise Vietnamese sources.
+      </div>
     </div>
 
     <div class="state-loading" id="stateLoading">
@@ -415,7 +421,7 @@
     <a class="footer-link" id="geniusLink" href="#" target="_blank">Genius ↗</a>
     <a class="footer-link" id="ytLink" href="#" target="_blank">YouTube ↗</a>
     <div class="footer-spacer"></div>
-    <div class="footer-copy">LyricTab v3</div>
+    <div class="footer-copy">LyricTab v6</div>
   </div>
 
 </div>

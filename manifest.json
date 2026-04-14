@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "LyricTab – YouTube Lyrics",
-  "version": "4.0.0",
+  "version": "6.0.0",
   "description": "Find lyrics for any YouTube video — supports English & Vietnamese songs.",
   "permissions": ["activeTab", "tabs", "sidePanel"],
+  "host_permissions": [
+    "https://hopamchuan.com/*"
+  ],
   "side_panel": {
     "default_path": "sidepanel.html"
   },
